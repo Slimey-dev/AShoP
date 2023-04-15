@@ -1,6 +1,6 @@
+using AShoP.Data;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using AShoP.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -37,8 +37,8 @@ app.UseRouting();
 app.UseAuthorization();
 
 app.MapControllerRoute(
-    name: "default",
-    pattern: "{controller=Home}/{action=Index}/{id?}");
+    "default",
+    "{controller=Catalog}/{action=Index}/{id?}");
 app.MapRazorPages();
 
 app.Run();
