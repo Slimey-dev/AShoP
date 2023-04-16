@@ -5,4 +5,18 @@
     Layout = "_Layout";
 }
 
-<h2>title</h2>
+<div style="display: flex; flex-direction: row; padding-top: 50px">
+    <div style="width: 40%">
+        <img src="@ViewBag.Item.Photo" style="height: 100%; width: 100%; ">
+    </div>
+    <div style="width: 50%; padding-left: 10%; text-align: center; display: flex; flex-direction: column">
+        <h2>@ViewBag.Item.Name</h2>
+        <div>@ViewBag.Item.Price $</div>
+        @using (Html.BeginForm("GetItems", "Cart", FormMethod.Post))
+        {
+            @Html.Hidden("id", ViewBag.Item.Id, new { })
+            <input type="number" id="quantity" name="quantity" value="1" min="1" max="99"/>
+            <button style="margin-top: auto; margin-bottom: 30px">Add to Cart</button>
+        }
+    </div>
+</div>

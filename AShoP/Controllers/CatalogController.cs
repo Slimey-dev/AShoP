@@ -1,5 +1,6 @@
 ﻿using AShoP.Data;
 using AShoP.Models;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AShoP.Controllers;
@@ -7,15 +8,41 @@ namespace AShoP.Controllers;
 public class CatalogController : Controller
 {
     private readonly ApplicationDbContext _context;
+    private readonly UserManager<IdentityUser> _userManager;
 
-    public CatalogController(ApplicationDbContext context)
+    public CatalogController(ApplicationDbContext context, UserManager<IdentityUser> userManager)
     {
+        _userManager = userManager;
         _context = context;
+    }
+
+    private Task<IdentityUser> GetCurrentUserAsync()
+    {
+        return _userManager.GetUserAsync(HttpContext.User);
     }
     // GET: Catalog
 
     public IActionResult Index(string? id)
     {
+        if (User.Identity!.IsAuthenticated)
+        {
+            var haveCart = _context.Orders.Any(c => c.IsOrder == false);
+            if (haveCart == false)
+            {
+                var guid = new Guid();
+                var order = new Order
+                {
+                    Id = guid,
+                    CustomerId = Guid.Parse(GetCurrentUserAsync().Result.Id),
+                    Total = 0,
+                    IsOrder = false
+                };
+                _context.Orders.Add(order);
+                _context.SaveChanges();
+            }
+        }
+
+
         if (string.IsNullOrEmpty(id))
         {
             var topLevelCategories = _context.Categories.Where(c => c.ParentCategoryId == null).Select(c => new Category
