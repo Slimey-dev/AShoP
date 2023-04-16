@@ -26,7 +26,8 @@ public class CatalogController : Controller
     {
         if (User.Identity!.IsAuthenticated)
         {
-            var haveCart = _context.Orders.Any(c => c.IsOrder == false);
+            var userid = Guid.Parse(GetCurrentUserAsync().Result.Id);
+            var haveCart = _context.Orders.Any(c => c.IsOrder == false && c.CustomerId == userid);
             if (haveCart == false)
             {
                 var guid = new Guid();

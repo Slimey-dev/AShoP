@@ -26,7 +26,8 @@ public class CustomUserManager<TUser> : UserManager<TUser> where TUser : Identit
         {
             var customer = new Customer
             {
-                Id = Guid.Parse(user.Id)
+                Id = Guid.Parse(user.Id),
+                Name = user.Email!.Split('@')[0]
             };
             _context.Customers.Add(customer);
             await _context.SaveChangesAsync();

@@ -2,6 +2,7 @@
 using AShoP.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace AShoP.Controllers;
 
@@ -24,6 +25,23 @@ public class CartController : Controller
     // GET
     public IActionResult Index()
     {
+        if (!User.Identity!.IsAuthenticated) return Unauthorized();
+        var userid = Guid.Parse(GetCurrentUserAsync().Result.Id);
+        var order = _context.Orders.First(c => c.CustomerId == userid && c.IsOrder == false);
+        var items = _context.OrderItems.Include(ci => ci.Item).Where(c => c.OrderId == order.Id).Select(c =>
+            new OrderItem
+            {
+                Id = c.Id,
+                ItemId = c.Id,
+                Item = c.Item,
+                Price = c.Price,
+                Quantity = c.Quantity
+            }).ToList();
+
+        ViewBag.Cart = items;
+
+        ViewBag.Total = RecalculateTotal();
+
         return View();
     }
 
@@ -53,5 +71,45 @@ public class CartController : Controller
         };
         _context.OrderItems.Add(orderItem);
         _context.SaveChanges();
+    }
+
+    public IActionResult CartChangeQuantity(string id, int quantity)
+    {
+        var guid = Guid.Parse(id);
+
+        var orderItem = _context.OrderItems.First(c => c.Id == guid);
+        orderItem.Quantity = quantity;
+        _context.OrderItems.Update(orderItem);
+        _context.SaveChanges();
+
+        return RedirectToAction("Index");
+    }
+
+    public IActionResult RemoveItem(string id, int quantity)
+    {
+        var guid = Guid.Parse(id);
+
+        var orderItem = _context.OrderItems.First(c => c.Id == guid);
+        _context.OrderItems.Remove(orderItem);
+        _context.SaveChanges();
+
+        return RedirectToAction("Index");
+    }
+
+    public decimal RecalculateTotal()
+    {
+        var userid = Guid.Parse(GetCurrentUserAsync().Result.Id);
+        var order = _context.Orders.Include(c => c.OrderItems).First(c => c.CustomerId == userid && c.IsOrder == false);
+
+        decimal total = 0;
+
+        foreach (var item in order.OrderItems!) total += item.Price * item.Quantity;
+
+        order.Total = total;
+
+        _context.Orders.Update(order);
+        _context.SaveChanges();
+
+        return total;
     }
 }

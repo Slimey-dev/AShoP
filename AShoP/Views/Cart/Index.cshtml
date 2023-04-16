@@ -1,0 +1,40 @@
+﻿@model dynamic
+
+@{
+    ViewBag.Title = "title";
+    Layout = "_Layout";
+}
+
+<h2>Cart</h2>
+<div>
+    <div>
+        @foreach (var item in ViewBag.Cart)
+        {
+            <div>
+                <a>@item.Item.Name</a>
+                <span>@item.Price</span>
+                <span>
+                    @using (Html.BeginForm("CartChangeQuantity", "Cart", FormMethod.Post))
+                    {
+                        @Html.Hidden("id", item.Id, new { })
+                        <input type="number" id="quantity" name="quantity" value="@item.Quantity" min="1" max="99"/>
+                        <button>Save</button>
+                    }
+                </span>
+                <span>
+                    @using (Html.BeginForm("RemoveItem", "Cart", FormMethod.Post))
+                    {
+                        @Html.Hidden("id", item.Id, new { })
+                        <button>Remove</button>
+                    }
+                </span>
+            </div>
+        }
+        <span>Total: @ViewBag.Total</span>
+    </div>
+    <a asp-controller="Order" asp-action="Index">
+        <button>
+            Continue to delivery
+        </button>
+    </a>
+</div>

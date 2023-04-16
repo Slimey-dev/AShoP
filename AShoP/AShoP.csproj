@@ -47,4 +47,8 @@
       <_ContentIncludedByDefault Remove="Views\TagsAdmin\Index.cshtml" />
     </ItemGroup>
 
+    <ItemGroup>
+      <AdditionalFiles Include="Views\Cart\Index.cshtml" />
+    </ItemGroup>
+
 </Project>
